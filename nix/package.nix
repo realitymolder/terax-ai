@@ -55,7 +55,8 @@ stdenv.mkDerivation {
     install -Dm755 usr/bin/terax $out/bin/terax
 
     wrapProgram $out/bin/terax \
-      --prefix GST_PLUGIN_SYSTEM_PATH : "$GST_PLUGIN_SYSTEM_PATH"
+      --prefix GST_PLUGIN_SYSTEM_PATH : "$GST_PLUGIN_SYSTEM_PATH" \
+      --set XDG_DATA_DIRS "$GSETTINGS_SCHEMAS_PATH"
   '' else ''
     mkdir -p $out/Applications
     cp -r *.app $out/Applications/
