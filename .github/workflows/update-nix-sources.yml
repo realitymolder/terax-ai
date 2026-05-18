@@ -4,6 +4,10 @@ on:
   release:
     types: [published]
   workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag (e.g. v0.6.6)"
+        required: true
 
 jobs:
   update:
@@ -18,7 +22,7 @@ jobs:
       - name: Download release assets
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.event.release.tag_name }}
+          TAG: ${{ github.event.release.tag_name || github.event.inputs.tag }}
         run: |
           VERSION="${TAG#v}"
           gh release download "$TAG" \
@@ -29,7 +33,7 @@ jobs:
       - name: Compute SRI hashes
         id: hashes
         env:
-          TAG: ${{ github.event.release.tag_name }}
+          TAG: ${{ github.event.release.tag_name || github.event.inputs.tag }}
         run: |
           VERSION="${TAG#v}"
           hash_sri() {
@@ -58,6 +62,6 @@ jobs:
         with:
           commit-message: "update nix sources to ${{ steps.hashes.outputs.version }}"
           title: "nix: update sources to ${{ steps.hashes.outputs.version }}"
-          body: "Automated update of \`nix/sources.json\` for release ${{ github.event.release.tag_name }}."
+          body: "Automated update of \`nix/sources.json\` for release ${{ github.event.release.tag_name || github.event.inputs.tag }}."
           branch: update-nix-sources/${{ steps.hashes.outputs.version }}
           delete-branch: true
